@@ -1,17 +1,23 @@
 package inky2013.cgutils.commands;
 
+import li.cil.oc.client.Sound;
+import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StackedCommand implements ICommand
+public class StackedCommand extends CommandBase
 {
     private final List aliases;
     private final List commands;
@@ -28,17 +34,6 @@ public class StackedCommand implements ICommand
         }
     }
 
-
-    public int compareTo(Object o) {
-        return 0;
-    }
-
-
-    @Override
-    public List getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] strs, BlockPos pos) {
-        return new ArrayList();
-    }
-
     @Override
     public String getCommandName()
     {
@@ -47,7 +42,7 @@ public class StackedCommand implements ICommand
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-
+        return sender instanceof EntityPlayer;
     }
 
     @Override
@@ -57,65 +52,16 @@ public class StackedCommand implements ICommand
     }
 
     @Override
-    public List getCommandAliases()
-    {
-        return this.aliases;
-    }
-
-    //@Override
-    public void processCommand(ICommandSender sender, String[] argString)
-    {
-        World world = sender.getEntityWorld();
-
-        if (world.isRemote)
-        {
-            System.out.println("Not processing on Client side");
-        }
-        else
-        {
-            System.out.println("Processing on Server side");
-            if(argString.length == 0)
-            {
-                sender.addChatMessage(new ChatComponentText("Invalid argument"));
-                return;
-            }
-
-            sender.addChatMessage(new ChatComponentText("Conjuring: [" + argString[0]
-                    + "]"));
-
-            fullEntityName = WildAnimals.MODID+"."+argString[0];
-            if (EntityList.stringToClassMapping.containsKey(fullEntityName))
-            {
-                conjuredEntity = EntityList.createEntityByName(fullEntityName, world);
-                conjuredEntity.setPosition(sender.getPlayerCoordinates().posX,
-                        sender.getPlayerCoordinates().posY,
-                        sender.getPlayerCoordinates().posZ);
-                world.spawnEntityInWorld(conjuredEntity);
-            }
-            else
-            {
-                sender.addChatMessage(new ChatComponentText("Entity not found"));
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+        for (int i=0; i<commands.size(); i++) {
+            try {
+                server.getCommandManager().executeCommand(server, commands.get(i).toString());
+            } catch (Exception e){
+                sender.addChatMessage(new TextComponentTranslation("cgutils.badcmdstack").setStyle(new Style().setColor(TextFormatting.RED)));
+                break;
             }
         }
+
     }
 
-    @Override
-    public boolean canCommandSenderUseCommand(ICommandSender var1)
-    {
-        return true;
-    }
-
-    @Override
-    public List addTabCompletionOptions(ICommandSender var1, String[] var2)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean isUsernameIndex(String[] var1, int var2)
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
 }
