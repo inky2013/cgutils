@@ -1,16 +1,10 @@
 package inky2013.cgutils;
 
 import inky2013.cgutils.commands.PrintTextTranslation;
-import inky2013.cgutils.commands.StackedCommand;
 import inky2013.cgutils.proxy.CommonProxy;
 import inky2013.cgutils.utils.CGCreativeTab;
 import inky2013.cgutils.utils.CGLogger;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -20,15 +14,12 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
-import java.util.Arrays;
-
 
 /**
  * Created by ethan on 02/01/2017.
  */
 @Mod(modid = Constants.modid, name = Constants.modname, version = Constants.version)
 public class CGUtils {
-
 
     @SidedProxy(clientSide = Constants.clientproxy,serverSide = Constants.serverproxy)
     public static CommonProxy proxy;
@@ -40,6 +31,7 @@ public class CGUtils {
     public static int[] oreSpawnAllow = {
             10 //Ender Ore
     };
+    public static String[] nocopy;
 
     @Mod.Instance(Constants.modid)
     public static CGUtils instance;
@@ -52,6 +44,7 @@ public class CGUtils {
         proxy.preInit(e);
         config = new Configuration(e.getSuggestedConfigurationFile());
         getCfg();
+
     }
 
     @Mod.EventHandler
@@ -80,7 +73,8 @@ public class CGUtils {
         try {
             config.load();
 
-            oreSpawnAllow[0] = config.get("WorldGen", "enderOre",10,"Rarity of ender ore. Set to 0 to disable the ore. Default is 10").getInt();
+            //oreSpawnAllow[0] = config.get("WorldGen", "enderOre",10,"Rarity of ender ore. Set to 0 to disable the ore. Default is 10").getInt();
+            nocopy = config.get("Item Duplication", "blacklist",new String[]{}, "Stuff you shouldn't be able to copy.").getStringList();
             registerCommandStacker = config.get("Commands", "registerCommandStacker",true,"Register the command stacker (runs preset commands set in the commandstacks directory)").getBoolean();
 
         } catch (Exception e) {

@@ -10,10 +10,13 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class CGItems {
 
     public static CGItem enderPowder;
-    public static CGLoreItem loreTestItem;
+    public static CGLoreItem copydust;
+    public static CGLoreItem hammer;
 
     public static void init() {
-        enderPowder = register(new CGLoreItem("enderPowder", new String[]{"Craft into ender pearls"}));
+        enderPowder = register(new CGItem("enderPowder"));
+        copydust = register(new CGLoreItem("copydust", new String[]{"It's magical"}));
+        hammer = register(new CGLoreItem("hammer", new String[]{"Useful for smashing stuff"}));
     }
 
     private static <T extends Item> T register(T item) {

@@ -2,3 +2,4 @@ itemGroup.cgutils=CGUtils
 item.enderPowder.name=Pulsating Dust
 
 cgutils.badcmdstack=Error reading the command stack
+cgutils.update=§aCGUtils§r: An update is available.

@@ -15,9 +15,7 @@ public class CGLoreItem extends CGItem {
     public String[] par3listtxt = new String[3];
 
     public CGLoreItem(String name, String[] pr3lst) {
-        this.name = name;
-        setUnlocalizedName(name);
-        //setRegistryName(name);
+        super(name);
         this.par3listtxt = pr3lst;
     }
 
