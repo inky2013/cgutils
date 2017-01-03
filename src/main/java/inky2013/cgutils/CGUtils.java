@@ -1,8 +1,14 @@
 package inky2013.cgutils;
 
+import inky2013.cgutils.commands.PrintTextTranslation;
 import inky2013.cgutils.commands.StackedCommand;
 import inky2013.cgutils.proxy.CommonProxy;
+import inky2013.cgutils.utils.CGCreativeTab;
 import inky2013.cgutils.utils.CGLogger;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
@@ -23,6 +29,7 @@ import java.util.Arrays;
 @Mod(modid = Constants.modid, name = Constants.modname, version = Constants.version)
 public class CGUtils {
 
+
     @SidedProxy(clientSide = Constants.clientproxy,serverSide = Constants.serverproxy)
     public static CommonProxy proxy;
 
@@ -34,6 +41,10 @@ public class CGUtils {
             10 //Ender Ore
     };
 
+    @Mod.Instance(Constants.modid)
+    public static CGUtils instance;
+
+    public static CGCreativeTab creativeTab = new CGCreativeTab();
 
 
     @Mod.EventHandler
@@ -56,8 +67,12 @@ public class CGUtils {
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event)
     {
-        String[] cmds = {"say hi", "say world"};
-        event.registerServerCommand(new StackedCommand("teststack", cmds, true));
+        event.registerServerCommand(new PrintTextTranslation());
+        if (registerCommandStacker) {
+            for (int i = 0; i < CommonProxy.stackedcommands.length; i++) {
+                event.registerServerCommand(CommonProxy.stackedcommands[i]);
+            }
+        }
     }
 
 
@@ -69,7 +84,8 @@ public class CGUtils {
             registerCommandStacker = config.get("Commands", "registerCommandStacker",true,"Register the command stacker (runs preset commands set in the commandstacks directory)").getBoolean();
 
         } catch (Exception e) {
-            CGLogger.warn("Failed to read config. Default values may be used for some attributes");
+            CGLogger.warn("Failed to read config.");
+            CGLogger.warn(e.toString());
         } finally {
             if (config.hasChanged()) config.save();
         }

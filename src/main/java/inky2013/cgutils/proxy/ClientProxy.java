@@ -1,5 +1,10 @@
 package inky2013.cgutils.proxy;
 
+import inky2013.cgutils.Constants;
+import inky2013.cgutils.items.CGItems;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -12,6 +17,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
+        CGItems.init();
     }
 
     @Override
@@ -22,6 +28,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void postInit(FMLPostInitializationEvent e) {
         super.postInit(e);
+    }
+
+    @Override
+    public void registerItemRenderer(Item item, int meta, String id) {
+        ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(Constants.modid + ":" + id, "inventory"));
     }
 
 }

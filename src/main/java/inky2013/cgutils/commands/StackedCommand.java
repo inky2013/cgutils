@@ -18,9 +18,6 @@ public class StackedCommand extends CommandBase
     private final List commands;
     private boolean op;
 
-    protected String fullEntityName;
-    protected Entity conjuredEntity;
-
     public StackedCommand(String name, String[] cmds, boolean needsop)
     {
         aliases = new ArrayList();
@@ -41,6 +38,12 @@ public class StackedCommand extends CommandBase
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return sender instanceof EntityPlayer;
+    }
+    public List getCommands() {
+        return commands;
+    }
+    public boolean getOpRequirement() {
+        return op;
     }
 
     @Override

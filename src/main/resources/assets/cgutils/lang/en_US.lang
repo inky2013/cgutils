@@ -1,0 +1,4 @@
+itemGroup.cgutils=CGUtils
+item.enderPowder.name=Pulsating Dust
+
+cgutils.badcmdstack=Error reading the command stack
