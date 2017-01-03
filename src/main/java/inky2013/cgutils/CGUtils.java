@@ -1,5 +1,6 @@
 package inky2013.cgutils;
 
+import inky2013.cgutils.commands.StackedCommand;
 import inky2013.cgutils.proxy.CommonProxy;
 import inky2013.cgutils.utils.CGLogger;
 import net.minecraftforge.common.config.Configuration;
@@ -9,6 +10,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
@@ -49,7 +51,15 @@ public class CGUtils {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent e) {
         proxy.postInit(e);
+
     }
+    @Mod.EventHandler
+    public void serverLoad(FMLServerStartingEvent event)
+    {
+        String[] cmds = {"say hi", "say world"};
+        event.registerServerCommand(new StackedCommand("teststack", cmds, true));
+    }
+
 
     public static void getCfg() {
         try {

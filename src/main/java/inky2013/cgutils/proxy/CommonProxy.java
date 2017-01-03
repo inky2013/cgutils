@@ -2,6 +2,7 @@ package inky2013.cgutils.proxy;
 
 import inky2013.cgutils.Constants;
 import inky2013.cgutils.utils.CGLogger;
+import inky2013.cgutils.utils.CommandStackReader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -24,7 +25,7 @@ public class CommonProxy {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent e) {
-
+        CommandStackReader.getStackedCommandsFromFile();
     }
 
 }
