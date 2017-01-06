@@ -1,6 +1,7 @@
 package inky2013.cgutils;
 
 import inky2013.cgutils.commands.PrintTextTranslation;
+import inky2013.cgutils.commands.Update;
 import inky2013.cgutils.proxy.CommonProxy;
 import inky2013.cgutils.utils.CGCreativeTab;
 import inky2013.cgutils.utils.CGLogger;
@@ -28,6 +29,7 @@ public class CGUtils {
     public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(Constants.modid);
 
     public static boolean registerCommandStacker = true;
+    public static boolean registerUpdateCommand = true;
     public static int[] oreSpawnAllow = {
             10 //Ender Ore
     };
@@ -37,6 +39,8 @@ public class CGUtils {
     public static CGUtils instance;
 
     public static CGCreativeTab creativeTab = new CGCreativeTab();
+
+    public Update updatecmd = new Update();
 
 
     @Mod.EventHandler
@@ -66,6 +70,9 @@ public class CGUtils {
                 event.registerServerCommand(CommonProxy.stackedcommands[i]);
             }
         }
+        if (registerUpdateCommand) {
+            event.registerServerCommand(updatecmd);
+        }
     }
 
 
@@ -76,6 +83,7 @@ public class CGUtils {
             //oreSpawnAllow[0] = config.get("WorldGen", "enderOre",10,"Rarity of ender ore. Set to 0 to disable the ore. Default is 10").getInt();
             nocopy = config.get("Item Duplication", "blacklist",new String[]{}, "Stuff you shouldn't be able to copy.").getStringList();
             registerCommandStacker = config.get("Commands", "registerCommandStacker",true,"Register the command stacker (runs preset commands set in the commandstacks directory)").getBoolean();
+            registerUpdateCommand = config.get("Commands", "registerUpdateCommand",true,"Register the command stacker (downloads a file set in the updates directory)").getBoolean();
 
         } catch (Exception e) {
             CGLogger.warn("Failed to read config.");

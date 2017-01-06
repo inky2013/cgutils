@@ -1,8 +1,8 @@
 package inky2013.cgutils.utils;
 
 import com.google.gson.Gson;
-import inky2013.cgutils.CGUtils;
 import inky2013.cgutils.commands.StackedCommand;
+import inky2013.cgutils.commands.UpdateInformation;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.File;
@@ -13,10 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/**
- * Created by ethan on 02/01/2017.
- */
-public class CommandStackReader {
+public class UpdateReader {
 
     static String readFile(String path, Charset encoding)
             throws IOException
@@ -25,17 +22,16 @@ public class CommandStackReader {
         return new String(encoded, encoding);
     }
 
-    public static StackedCommand[] getStackedCommandsFromFile() {
+    public static UpdateInformation[] getUpdatesFromFile() {
 
         Gson gson = new Gson();
 
-        File stackdirFile = new File("config/cgutils/stacks/");
-        CGLogger.info(stackdirFile.getAbsolutePath());
+        File stackdirFile = new File("config/cgutils/updates/");
 
         //TODO Convert text to TextComponentTranslation
 
         if (!(stackdirFile.exists())) {
-            CGLogger.info(String.format("Creating stacks directory at '%s'", stackdirFile.getAbsolutePath()));
+            CGLogger.info(String.format("Creating updates directory at '%s'", stackdirFile.getAbsolutePath()));
             boolean result = false;
             try {
                 stackdirFile.mkdirs();
@@ -55,12 +51,11 @@ public class CommandStackReader {
             }
         });
 
-        StackedCommand[] commandlist = new StackedCommand[files.length];
+        UpdateInformation[] commandlist = new UpdateInformation[files.length];
 
         for (int i = 0; i < files.length; i++) {
             try {
-                CommandStack stk = gson.fromJson(new FileReader(files[i]), CommandStack.class);
-                commandlist[i] = new StackedCommand(stk.name, stk.commands, stk.requiresop);
+                commandlist[i] = gson.fromJson(new FileReader(files[i]), UpdateInformation.class);;
             } catch (IOException e) {
                 CGLogger.warn(new TextComponentTranslation("cgutils.fileioexception"));
             }
