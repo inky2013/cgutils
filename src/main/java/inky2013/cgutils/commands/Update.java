@@ -66,9 +66,25 @@ public class Update extends CommandBase{
             CGLogger.info(String.format("Assigned '%s' to '%s'", ui.name, ui.url));
         }
     }
+
+
+
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         UpdateInformation currentRequest = null;
+
+        if (args.length == 1) { //reload, list, help, wiki
+
+
+
+        } else if (args.length == 2) { //get, group
+
+        } else if (args.length == 3) { //get url
+
+        }
+
+
+
         if (args.length == 1) {
             if (!(urls.containsKey(args[0]))) {
                 if (!(Arrays.asList(new String[]{"list", "reload"}).contains(args[0]))) {
@@ -80,7 +96,9 @@ public class Update extends CommandBase{
             }
         } else if (args.length == 2) {
             currentRequest = new UpdateInformation(null, args[0], args[1]);
-        } else { return; }
+        } else {
+            return;
+        }
         if (args[0].equalsIgnoreCase("list")) {
             for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
                 String key = entry.getKey();
@@ -98,9 +116,11 @@ public class Update extends CommandBase{
             sender.addChatMessage(new TextComponentTranslation("cgutils.update.requestisnull"));
             return;
         }
-        //if (!(args[1].startsWith("/") || args[1].startsWith("\\"))) { args[1] = "/"+args[1]; }
-        //args[1] = CGUtils.workingDirectory+args[1];
+    }
 
+
+
+    public void downloadUpdate(UpdateInformation currentRequest, ICommandSender sender) {
         String filename = FilenameUtils.getName(currentRequest.saveLocation);
         String pathname = FilenameUtils.getFullPath(currentRequest.saveLocation);
         if (pathname.equals("")) { pathname = CGUtils.workingDirectory; }
@@ -109,19 +129,25 @@ public class Update extends CommandBase{
         try {
             URL url = new URL(currentRequest.url);
             URLConnection con = url.openConnection();
+            //Try and get a filename from somewhere (savepath -> HTTP headers -> url)
             if (filename.equals("")) {
                 String fieldValue = con.getHeaderField("Content-Disposition");
-                if (fieldValue == null || !fieldValue.contains("filename=\"")) {
+                if (!(fieldValue == null || !fieldValue.contains("filename=\""))) {
+                    filename = fieldValue.substring(fieldValue.indexOf("filename=\"") + 10, fieldValue.length() - 1);
+                }
+                if (filename.equals("")) {
+                    filename = FilenameUtils.getName(currentRequest.url);
+                }
+                if (filename.equals("")) {
                     sender.addChatMessage(new TextComponentTranslation("cgutils.update.response.nofilename"));
                     return;
                 }
-                filename = fieldValue.substring(fieldValue.indexOf("filename=\"") + 10, fieldValue.length() - 1);
             }
             File download = new File(System.getProperty("java.io.tmpdir"), filename);
             sender.addChatMessage(new TextComponentString("120: "+download.toString()));
             ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
             FileOutputStream fos = new FileOutputStream(download);
-            boolean didDownload = false;
+            boolean didDownload;
             try {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 didDownload = true;
@@ -156,7 +182,7 @@ public class Update extends CommandBase{
             CGLogger.error(e);
             return;
         }
-        //sender.addChatMessage(new TextComponentTranslation("cgutils.update.complete"));
+        sender.addChatMessage(new TextComponentTranslation("cgutils.update.complete"));
     }
 
 }

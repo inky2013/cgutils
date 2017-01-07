@@ -22,7 +22,7 @@ import java.io.File;
 /**
  * Created by ethan on 02/01/2017.
  */
-@Mod(modid = Constants.modid, name = Constants.modname, version = Constants.version)
+@Mod(modid = Constants.modid, name = Constants.modname, version = Constants.version, updateJSON = "https://inky2013.github.io/cgutils/update.json")
 public class CGUtils {
 
     @SidedProxy(clientSide = Constants.clientproxy,serverSide = Constants.serverproxy)
