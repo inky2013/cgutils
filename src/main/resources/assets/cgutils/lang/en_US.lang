@@ -1,8 +1,47 @@
+//Items
 itemGroup.cgutils=CGUtils
 item.enderPowder.name=Pulsating Dust
 
-cgutils.badcmdstack=Error reading the command stack
-cgutils.update=§aCGUtils§r: An update is available
-cgutils.noupdatenamed=§4No update found with the name "§r%s§4". Use §r/update reload §4to reload updates§r
-cgutils.java.malformedurl=Malformed URL
-cgutils.update.list=%s -> %s
+//CommandStack
+cgutils.badcmdstack=[§2CGUtils§r] Error reading the command stack
+
+//Update Good
+cgutils.update.list=+ %s
+cgutils.update.list.grouped=+ %s (%s)
+cgutils.update.group.updatedint=[§2CGUtils§r] Updated %d files
+cgutils.update.complete=[§2CGUtils§r] §2Updated §r"%s"
+cgutils.update.reload=[§2CGUtils§r] Update list reloaded from config
+cgutils.update.help.line1=§2Update command help:§r
+cgutils.update.help.line2=§r + Set updates in config
+cgutils.update.help.line3=§r - §5/update reload §rreloads updates
+cgutils.update.help.line4=§r - §5/update list [group] §rlists all updates
+cgutils.update.help.line5=§r - §5/update get <name> §rwill update the specified file
+cgutils.update.help.line6=§r - §5/update group <group> §rwill update all files in that group
+cgutils.update.help.line7=§r - §5/update get <url> <file> §rdownloads <url> and saves it to <file>
+
+//Update Errors
+cgutils.update.httpcode=[§2CGUtils§r] §4Server responded with HTTP code %s
+cgutils.noupdatenamed=[§2CGUtils§r] No update found with the name "%s". Use §5/update reload §rto reload updates§r
+cgutils.update.group.none=[§2CGUtils§r] No updates were found with group: "%s"
+cgutils.update.invalidargs=[§2CGUtils§r] Invalid arguments. Use §5/update help§r to see usage.
+cgutils.update.response.nofilename=[§2CGUtils§r] Could not find the filename. This can be set by adding the filename to the path in config.
+cgutils.update.unknownfail=[§2CGUtils§r] An unknown exception occurred.
+cgutils.update.nokey=[§2CGUtils§r] There is no update with that name
+cgutils.update.group.none=[§2CGUtils§r] That group does not exist
+cgutils.update.didnotcomplete.named=[§2CGUtils§r] Did not download "%s"
+cgutils.update.didnotcomplete.unnamed=[§2CGUtils§r] Did not download file
+
+
+//Java Errors
+cgutils.java.malformedurl=[§2CGUtils§r] Java Malformed URL Exception Occurred
+cgutils.javaerror.filenotfound=[§2CGUtils§r] Java File Not Found Exception
+cgutils.javaerror.ioexception=[§2CGUtils§r] Java IO Exception
+cgutils.javaerror.security=[§2CGUtils§r] Java Security Exception
+cgutils.javaerror.illegalstate=[§2CGUtils§r] Java IllegalState Exception
+
+
+
+
+
+
+

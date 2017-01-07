@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -25,6 +26,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Created by ethan on 03/01/2017.
@@ -71,51 +73,78 @@ public class Update extends CommandBase{
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
-        UpdateInformation currentRequest = null;
+        if (args.length == 1) { //reload, list, help
+            if (args[0].equalsIgnoreCase("help")) {
+                for (int i=1; i<8; i++) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.update.help.line"+ String.valueOf(i)));
+                }
+                return;
+            }
+            if (args[0].equalsIgnoreCase("list")) {
+                for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
+                    String key = entry.getKey();
+                    UpdateInformation value = entry.getValue();
+                    if (value.group == null) {
+                        sender.addChatMessage(new TextComponentTranslation("cgutils.update.list", key));
+                    } else {
+                        sender.addChatMessage(new TextComponentTranslation("cgutils.update.list.grouped", key, value.group));
+                    }
 
-        if (args.length == 1) { //reload, list, help, wiki
+                }
+                return;
+            }
+            if (args[0].equalsIgnoreCase("reload")) {
+                CGUtils.instance.proxy.reloadUpdates();
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.reload"));
+                return;
+            }
 
-
-
-        } else if (args.length == 2) { //get, group
-
-        } else if (args.length == 3) { //get url
-
-        }
-
-
-
-        if (args.length == 1) {
-            if (!(urls.containsKey(args[0]))) {
-                if (!(Arrays.asList(new String[]{"list", "reload"}).contains(args[0]))) {
-                    sender.addChatMessage(new TextComponentTranslation("cgutils.noupdatenamed", args[0]));
+        } else if (args.length == 2) { //get, group, list
+            if (args[0].equalsIgnoreCase("get")) {
+                if (urls.containsKey(args[1])) {
+                    downloadUpdate(urls.get(args[1]), sender);
                     return;
                 }
-            } else {
-                currentRequest = urls.get(args[0]);
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.nokey"));
             }
-        } else if (args.length == 2) {
-            currentRequest = new UpdateInformation(null, args[0], args[1]);
-        } else {
-            return;
-        }
-        if (args[0].equalsIgnoreCase("list")) {
-            for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
-                String key = entry.getKey();
-                UpdateInformation value = entry.getValue();
-                sender.addChatMessage(new TextComponentTranslation("cgutils.update.list", key, value.url));
+            if (args[0].equalsIgnoreCase("group")) {
+                int updated = 0;
+                for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
+                    String key = entry.getKey();
+                    UpdateInformation value = entry.getValue();
+                    if (value.group == null) { continue; }
+                    if (value.group.equalsIgnoreCase(args[1])) {
+                        updated++;
+                        downloadUpdate(value, sender);
+                    }
+
+                }
+                if (updated == 0) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.update.group.none", args[1]));
+                    return;
+                }
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.group.updatedint", updated));
+                return;
             }
-            return;
+            if (args[0].equalsIgnoreCase("list")) {
+                for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
+                    String key = entry.getKey();
+                    UpdateInformation value = entry.getValue();
+                    if (value.group.equalsIgnoreCase(args[1])) {
+                        sender.addChatMessage(new TextComponentTranslation("cgutils.update.list", key));
+                    }
+                }
+                return;
+            }
+
+
+        } else if (args.length == 3) { //get url
+            if (args[0].equalsIgnoreCase("get")) {
+                downloadUpdate(new UpdateInformation(null, args[2], args[1]), sender);
+                return;
+            }
         }
-        if (args[0].equalsIgnoreCase("reload")) {
-            CGUtils.instance.proxy.reloadUpdates();
-            sender.addChatMessage(new TextComponentTranslation("cgutils.update.reload"));
-            return;
-        }
-        if (currentRequest == null) {
-            sender.addChatMessage(new TextComponentTranslation("cgutils.update.requestisnull"));
-            return;
-        }
+        sender.addChatMessage(new TextComponentTranslation("cgutils.update.invalidargs"));
     }
 
 
@@ -129,6 +158,21 @@ public class Update extends CommandBase{
         try {
             URL url = new URL(currentRequest.url);
             URLConnection con = url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int code = connection.getResponseCode();
+            CGLogger.info("Server responded with HTTP status code "+String.valueOf(code));
+            if (!(String.valueOf(code).startsWith("2"))) {
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.httpcode", code));
+                if (currentRequest.name == null) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.update.didnotcomplete.unnamed"));
+                } else {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.update.didnotcomplete.named", currentRequest.name));
+                }
+                return;
+            }
+
             //Try and get a filename from somewhere (savepath -> HTTP headers -> url)
             if (filename.equals("")) {
                 String fieldValue = con.getHeaderField("Content-Disposition");
@@ -144,7 +188,6 @@ public class Update extends CommandBase{
                 }
             }
             File download = new File(System.getProperty("java.io.tmpdir"), filename);
-            sender.addChatMessage(new TextComponentString("120: "+download.toString()));
             ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
             FileOutputStream fos = new FileOutputStream(download);
             boolean didDownload;
@@ -169,7 +212,7 @@ public class Update extends CommandBase{
             return;
 
         } catch (IOException e) {
-            sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.io"));
+            sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.ioexception"));
             CGLogger.error(e);
             return;
 
@@ -182,7 +225,8 @@ public class Update extends CommandBase{
             CGLogger.error(e);
             return;
         }
-        sender.addChatMessage(new TextComponentTranslation("cgutils.update.complete"));
+        if (currentRequest.name == null) { currentRequest.name = FilenameUtils.getBaseName(currentRequest.saveLocation); }
+        sender.addChatMessage(new TextComponentTranslation("cgutils.update.complete", currentRequest.name));
     }
 
 }

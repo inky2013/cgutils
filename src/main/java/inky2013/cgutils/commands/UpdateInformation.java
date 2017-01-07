@@ -7,6 +7,7 @@ public class UpdateInformation {
     public String name;
     public String saveLocation;
     public String url;
+    public String group;
 
     public UpdateInformation() {}
     public UpdateInformation(String name, String saveLocation, String url) {
