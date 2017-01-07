@@ -40,7 +40,7 @@ public class CommonProxy {
     public void postInit(FMLPostInitializationEvent e) {
         getStackedCommands();
         reloadRecipes();
-        getUpdateCommands();
+        reloadUpdates();
     }
     public void registerItemRenderer(Item item, int meta, String id) {
 
@@ -53,13 +53,23 @@ public class CommonProxy {
             }
         }
     }
-    public void getUpdateCommands() {
+
+    public void reloadUpdates() {
+        CGUtils.instance.updatecmd.clear();
+        UpdateInformation[] u = getUpdateCommands();
+        for (UpdateInformation i : u) {
+            CGUtils.instance.updatecmd.registerDownload(i);
+        }
+    }
+
+    public UpdateInformation[] getUpdateCommands() {
         if (CGUtils.registerUpdateCommand) {
             updates = UpdateReader.getUpdatesFromFile();
             for (int i = 0; i < updates.length; i++) {
                 CGLogger.info("Found update '" + updates[i].name + "'");
             }
         }
+        return updates;
     }
     public void reloadRecipes() {
         int loaded = recipes.registerCopyRecipes();

@@ -1,21 +1,30 @@
 package inky2013.cgutils.commands;
 
+import com.google.common.io.Files;
+import inky2013.cgutils.CGUtils;
+import inky2013.cgutils.proxy.CommonProxy;
 import inky2013.cgutils.utils.CGLogger;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ethan on 03/01/2017.
@@ -41,6 +50,10 @@ public class Update extends CommandBase{
 
     private HashMap<String, UpdateInformation> urls = new HashMap<String, UpdateInformation>();
 
+    public void clear() {
+        urls.clear();
+    }
+
     public void registerDownload(UpdateInformation ui) {
         if (Arrays.asList(new String[]{"list", "reload"}).contains(ui.name)) {
             CGLogger.warn("Registering an update command as \""+ui.name+"\"");
@@ -55,26 +68,95 @@ public class Update extends CommandBase{
     }
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+        UpdateInformation currentRequest = null;
         if (args.length == 1) {
             if (!(urls.containsKey(args[0]))) {
-                sender.addChatMessage(new TextComponentTranslation("cgutils.noupdatenamed", args[0]));
+                if (!(Arrays.asList(new String[]{"list", "reload"}).contains(args[0]))) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.noupdatenamed", args[0]));
+                    return;
+                }
+            } else {
+                currentRequest = urls.get(args[0]);
             }
-            args = new String[]{urls.get(args[0]).url, urls.get(args[0]).saveLocation};
-        } else if (args.length != 2) { return; }
-        try {
+        } else if (args.length == 2) {
+            currentRequest = new UpdateInformation(null, args[0], args[1]);
+        } else { return; }
+        if (args[0].equalsIgnoreCase("list")) {
+            for (Map.Entry<String, UpdateInformation> entry : urls.entrySet()) {
+                String key = entry.getKey();
+                UpdateInformation value = entry.getValue();
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.list", key, value.url));
+            }
+            return;
+        }
+        if (args[0].equalsIgnoreCase("reload")) {
+            CGUtils.instance.proxy.reloadUpdates();
+            sender.addChatMessage(new TextComponentTranslation("cgutils.update.reload"));
+            return;
+        }
+        if (currentRequest == null) {
+            sender.addChatMessage(new TextComponentTranslation("cgutils.update.requestisnull"));
+            return;
+        }
+        //if (!(args[1].startsWith("/") || args[1].startsWith("\\"))) { args[1] = "/"+args[1]; }
+        //args[1] = CGUtils.workingDirectory+args[1];
 
-            URL website = new URL(args[0]);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-            FileOutputStream fos = new FileOutputStream(args[1]);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        String filename = FilenameUtils.getName(currentRequest.saveLocation);
+        String pathname = FilenameUtils.getFullPath(currentRequest.saveLocation);
+        if (pathname.equals("")) { pathname = CGUtils.workingDirectory; }
+        CGUtils.ensureDirectory(new File(pathname));
+
+        try {
+            URL url = new URL(currentRequest.url);
+            URLConnection con = url.openConnection();
+            if (filename.equals("")) {
+                String fieldValue = con.getHeaderField("Content-Disposition");
+                if (fieldValue == null || !fieldValue.contains("filename=\"")) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.update.response.nofilename"));
+                    return;
+                }
+                filename = fieldValue.substring(fieldValue.indexOf("filename=\"") + 10, fieldValue.length() - 1);
+            }
+            File download = new File(System.getProperty("java.io.tmpdir"), filename);
+            sender.addChatMessage(new TextComponentString("120: "+download.toString()));
+            ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
+            FileOutputStream fos = new FileOutputStream(download);
+            boolean didDownload = false;
+            try {
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                didDownload = true;
+            } finally {
+                fos.close();
+            }
+            if (!(didDownload)) {
+                sender.addChatMessage(new TextComponentTranslation("cgutils.update.unknownfail"));
+                return;
+            }
+            Files.copy(download, new File(pathname, filename));
+        } catch (FileNotFoundException e) {
+            sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.filenotfound"));
+            CGLogger.error(e);
 
         } catch (MalformedURLException e) {
             sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.malformedurl"));
+            CGLogger.error(e);
+            return;
+
         } catch (IOException e) {
             sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.io"));
+            CGLogger.error(e);
+            return;
+
         } catch (SecurityException e) {
             sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.security"));
+            CGLogger.error(e);
+            return;
+        } catch (IllegalStateException e) {
+            sender.addChatMessage(new TextComponentTranslation("cgutils.javaerror.illegalstate"));
+            CGLogger.error(e);
+            return;
         }
+        //sender.addChatMessage(new TextComponentTranslation("cgutils.update.complete"));
     }
 
 }

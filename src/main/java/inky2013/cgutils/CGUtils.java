@@ -14,6 +14,9 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
 
 
 /**
@@ -34,6 +37,7 @@ public class CGUtils {
             10 //Ender Ore
     };
     public static String[] nocopy;
+    public static String workingDirectory = System.getProperty("user.dir");
 
     @Mod.Instance(Constants.modid)
     public static CGUtils instance;
@@ -92,5 +96,22 @@ public class CGUtils {
             if (config.hasChanged()) config.save();
         }
     }
+
+    public static void ensureDirectory(File ind) {
+        if (!(ind.exists())) {
+            CGLogger.info(String.format("Creating directory at '%s'", ind.getAbsolutePath()));
+            boolean result = false;
+            try {
+                ind.mkdirs();
+                result = true;
+            } catch (SecurityException se) {
+                CGLogger.warn(String.format("Permission was denied accessing '%s'", ind.getAbsolutePath()));
+            }
+            if (result) {
+                CGLogger.info(String.format("Created '%s'", ind.getAbsolutePath()));
+            }
+        }
+    }
+
 
 }

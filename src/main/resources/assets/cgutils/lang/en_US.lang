@@ -5,3 +5,4 @@ cgutils.badcmdstack=Error reading the command stack
 cgutils.update=§aCGUtils§r: An update is available
 cgutils.noupdatenamed=§4No update found with the name "§r%s§4". Use §r/update reload §4to reload updates§r
 cgutils.java.malformedurl=Malformed URL
+cgutils.update.list=%s -> %s

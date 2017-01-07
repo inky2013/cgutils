@@ -8,4 +8,10 @@ public class UpdateInformation {
     public String saveLocation;
     public String url;
 
+    public UpdateInformation() {}
+    public UpdateInformation(String name, String saveLocation, String url) {
+        this.name = name;
+        this.saveLocation = saveLocation;
+        this.url = url;
+    }
 }
