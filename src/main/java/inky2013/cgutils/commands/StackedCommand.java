@@ -1,11 +1,13 @@
 package inky2013.cgutils.commands;
 
+import inky2013.cgutils.utils.CGLogger;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -14,19 +16,30 @@ import java.util.List;
 
 public class StackedCommand extends CommandBase
 {
-    private final List aliases;
-    private final List commands;
+    private List<String> aliases;
+    private List<String> commands;
     private boolean op;
+    private boolean requiresArgs;
+    private boolean execAsServer;
+    private int argslen;
 
-    public StackedCommand(String name, String[] cmds, boolean needsop)
+    public StackedCommand(String name, String[] cmds, boolean needsop, boolean requiresArgs, int argslen, boolean execAsServer)
     {
-        aliases = new ArrayList();
-        aliases.add(name);
-        commands = new ArrayList();
+        this.aliases = new ArrayList<String>();
+        this.aliases.add(name);
+        this.commands = new ArrayList<String>();
+        updateData(cmds, needsop, requiresArgs, argslen, execAsServer);
+    }
+
+    public void updateData(String[] cmds, boolean needsop, boolean requiresArgs, int argslen, boolean execAsServer) {
+        this.requiresArgs = requiresArgs;
+        this.argslen = argslen;
+        this.execAsServer = execAsServer;
         for (int i=0; i<cmds.length;i++) {
             commands.add(cmds[i]);
         }
         op = needsop;
+
     }
 
     @Override
@@ -37,14 +50,13 @@ public class StackedCommand extends CommandBase
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-        return sender instanceof EntityPlayer;
+        if (!(op)) { return true; }
+        return server.isSinglePlayer() || super.checkPermission(server, sender);
     }
     public List getCommands() {
         return commands;
     }
-    public boolean getOpRequirement() {
-        return op;
-    }
+    public boolean getOpRequirement() { return op; }
 
     @Override
     public String getCommandUsage(ICommandSender var1)
@@ -54,12 +66,34 @@ public class StackedCommand extends CommandBase
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
-        //TODO Check if player is opped and if op is required
+        if (requiresArgs) {
+            if (args.length != argslen) {
+                sender.addChatMessage(new TextComponentTranslation("cgutils.cmdstack.invalidargs", argslen));
+                return;
+            }
+        }
+        if (commands.size() == 0) {
+            sender.addChatMessage(new TextComponentTranslation("cgutils.cmdstack.emptystack"));
+            return;
+        }
         for (int i=0; i<commands.size(); i++) {
             try {
-                server.getCommandManager().executeCommand(server, commands.get(i).toString());
+                String cmd = commands.get(i).toString();
+                if (cmd.contains("{{sender}}")) {
+                    cmd = cmd.replace("{{sender}}", sender.getName());
+                }
+                for (int z=0; z<args.length; z++) {
+                    if (cmd.contains("{{"+z+"}}")) {
+                        cmd = cmd.replace("{{"+z+"}}", args[z]);
+                    }
+                }
+                int output = server.getCommandManager().executeCommand(server, cmd);
+                if (server.getServer().worldServerForDimension(0).getGameRules().getBoolean("commandStackOutput")) {
+                    sender.addChatMessage(new TextComponentTranslation("cgutils.cmdstack.returned", cmd, output));
+                }
             } catch (Exception e){
-                sender.addChatMessage(new TextComponentTranslation("cgutils.badcmdstack").setStyle(new Style().setColor(TextFormatting.RED)));
+                sender.addChatMessage(new TextComponentTranslation("cgutils.badcmdstack"));
+                CGLogger.error(e);
                 break;
             }
         }
