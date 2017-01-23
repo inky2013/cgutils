@@ -2,15 +2,14 @@ package inky2013.cgutils.commands;
 
 import com.google.common.io.Files;
 import inky2013.cgutils.CGUtils;
-import inky2013.cgutils.proxy.CommonProxy;
 import inky2013.cgutils.utils.CGLogger;
+import mcp.mobius.waila.api.impl.ConfigHandler;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import org.apache.commons.io.FileUtils;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -26,7 +25,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  * Created by ethan on 03/01/2017.
@@ -41,7 +39,7 @@ public class Update extends CommandBase{
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-        return sender instanceof EntityPlayer;
+        return server.isSinglePlayer() || super.checkPermission(server, sender);
     }
 
     @Override
@@ -94,7 +92,7 @@ public class Update extends CommandBase{
                 return;
             }
             if (args[0].equalsIgnoreCase("reload")) {
-                CGUtils.instance.proxy.reloadUpdates();
+                CGUtils.instance.reloadUpdates();
                 sender.addChatMessage(new TextComponentTranslation("cgutils.update.reload"));
                 return;
             }
