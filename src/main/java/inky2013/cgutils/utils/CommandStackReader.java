@@ -1,7 +1,6 @@
 package inky2013.cgutils.utils;
 
 import com.google.gson.Gson;
-import inky2013.cgutils.CGUtils;
 import inky2013.cgutils.commands.StackedCommand;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -25,7 +24,7 @@ public class CommandStackReader {
         return new String(encoded, encoding);
     }
 
-    public static StackedCommand[] getStackedCommandsFromFile() {
+    public static CommandStackData[] getStackedCommandsFromFile() {
 
         Gson gson = new Gson();
 
@@ -55,12 +54,12 @@ public class CommandStackReader {
             }
         });
 
-        StackedCommand[] commandlist = new StackedCommand[files.length];
+        CommandStackData[] commandlist = new CommandStackData[files.length];
 
         for (int i = 0; i < files.length; i++) {
             try {
-                CommandStack stk = gson.fromJson(new FileReader(files[i]), CommandStack.class);
-                commandlist[i] = new StackedCommand(stk.name, stk.commands, stk.requiresop);
+                CommandStackData stk = gson.fromJson(new FileReader(files[i]), CommandStackData.class);
+                commandlist[i] = stk;
             } catch (IOException e) {
                 CGLogger.warn(new TextComponentTranslation("cgutils.fileioexception"));
             }
