@@ -4,6 +4,11 @@ item.enderPowder.name=Pulsating Dust
 
 //CommandStack
 cgutils.badcmdstack=[§2CGUtils§r] Error reading the command stack
+cgutils.stacks.reload=[§2CGUtils§r] Reloaded command stacks
+cgutils.stacks.reload.newfound=[§2CGUtils§r] Reloaded existing command stacks. %s new stacks were found but were not loaded into the game (%s)
+cgutils.cmdstack.invalidargs=[§2CGUtils§r] Command stack requires %s arguments
+cgutils.cmdstack.emptystack=[§2CGUtils§r] Command stack is empty
+cgutils.cmdstack.returned=§2%s§r returned: %s
 
 //Update Good
 cgutils.update.list=+ %s
@@ -39,7 +44,7 @@ cgutils.javaerror.ioexception=[§2CGUtils§r] Java IO Exception
 cgutils.javaerror.security=[§2CGUtils§r] Java Security Exception
 cgutils.javaerror.illegalstate=[§2CGUtils§r] Java IllegalState Exception
 
-
+cgutils.showentitydata=§2%s <%s>
 
 
 
