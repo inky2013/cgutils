@@ -37,6 +37,11 @@ cgutils.update.didnotcomplete.named=[§2CGUtils§r] Did not download "%s"
 cgutils.update.didnotcomplete.unnamed=[§2CGUtils§r] Did not download file
 
 
+//Calc Command
+calc.error = [§2CGUtils§r] §4Syntax Error
+calc.success = %s = §5%s
+
+
 //Java Errors
 cgutils.java.malformedurl=[§2CGUtils§r] Java Malformed URL Exception Occurred
 cgutils.javaerror.filenotfound=[§2CGUtils§r] Java File Not Found Exception
